@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -26,14 +26,9 @@ class CategoryController extends Controller
         return Inertia::render('categories/create');
     }
 
-    public function store(Request $request)
+    public function store(CategoryRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'description' => 'nullable|string',
-            'is_active' => 'boolean',
-        ]);
-
+        $validated = $request->validated();
         $validated['created_by'] = auth()->id();
 
         $category = Category::create($validated);
@@ -60,14 +55,9 @@ class CategoryController extends Controller
         ]);
     }
 
-    public function update(Request $request, Category $category)
+    public function update(CategoryRequest $request, Category $category)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'description' => 'nullable|string',
-            'is_active' => 'boolean',
-        ]);
-
+        $validated = $request->validated();
         $validated['updated_by'] = auth()->id();
 
         $category->update($validated);

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CancelRequest;
+use App\Http\Requests\SaleRequest;
 use App\Models\CashRegister;
 use App\Models\Product;
 use App\Models\Sale;
@@ -51,19 +53,9 @@ class SaleController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(SaleRequest $request)
     {
-        $validated = $request->validate([
-            'store_id' => 'required|exists:stores,id',
-            'cash_register_id' => 'required|exists:cash_registers,id',
-            'payment_method' => 'required|in:efectivo,tarjeta,transferencia,mixto',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.unit_price' => 'required|numeric|min:0',
-            'tax' => 'nullable|numeric|min:0',
-            'discount' => 'nullable|numeric|min:0',
-        ]);
+        $validated = $request->validated();
 
         return DB::transaction(function () use ($validated) {
             $subtotal = collect($validated['items'])->sum(function ($item) {
@@ -111,15 +103,13 @@ class SaleController extends Controller
         ]);
     }
 
-    public function cancel(Request $request, Sale $sale)
+    public function cancel(CancelRequest $request, Sale $sale)
     {
         if ($sale->status === 'anulada') {
             return back()->withErrors(['error' => 'Esta venta ya está anulada.']);
         }
 
-        $validated = $request->validate([
-            'cancellation_reason' => 'required|string|max:500',
-        ]);
+        $validated = $request->validated();
 
         $sale->update([
             'status' => 'anulada',

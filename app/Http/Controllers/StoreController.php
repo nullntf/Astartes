@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreRequest;
 use App\Models\Store;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -25,16 +25,9 @@ class StoreController extends Controller
         return Inertia::render('stores/create');
     }
 
-    public function store(Request $request)
+    public function store(StoreRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'code' => 'required|string|max:20|unique:stores,code',
-            'address' => 'nullable|string',
-            'phone' => 'nullable|string|max:20',
-            'is_active' => 'boolean',
-        ]);
-
+        $validated = $request->validated();
         $validated['created_by'] = auth()->id();
 
         $store = Store::create($validated);
@@ -59,16 +52,9 @@ class StoreController extends Controller
         ]);
     }
 
-    public function update(Request $request, Store $store)
+    public function update(StoreRequest $request, Store $store)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'code' => 'required|string|max:20|unique:stores,code,'.$store->id,
-            'address' => 'nullable|string',
-            'phone' => 'nullable|string|max:20',
-            'is_active' => 'boolean',
-        ]);
-
+        $validated = $request->validated();
         $validated['updated_by'] = auth()->id();
 
         $store->update($validated);

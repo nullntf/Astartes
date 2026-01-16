@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CashMovementRequest;
+use App\Http\Requests\CashRegisterCloseRequest;
+use App\Http\Requests\CashRegisterRequest;
 use App\Models\CashRegister;
 use App\Models\Store;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -37,13 +39,9 @@ class CashRegisterController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(CashRegisterRequest $request)
     {
-        $validated = $request->validate([
-            'store_id' => 'required|exists:stores,id',
-            'opening_balance' => 'required|numeric|min:0',
-            'notes' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $openRegister = CashRegister::where('store_id', $validated['store_id'])
             ->where('status', 'abierta')
@@ -102,16 +100,13 @@ class CashRegisterController extends Controller
         ]);
     }
 
-    public function close(Request $request, CashRegister $cashRegister)
+    public function close(CashRegisterCloseRequest $request, CashRegister $cashRegister)
     {
         if ($cashRegister->status === 'cerrada') {
             return back()->withErrors(['error' => 'Esta caja ya está cerrada.']);
         }
 
-        $validated = $request->validate([
-            'closing_balance' => 'required|numeric|min:0',
-            'notes' => 'nullable|string',
-        ]);
+        $validated = $request->validated();
 
         $cashRegister->update([
             'status' => 'cerrada',
@@ -125,17 +120,13 @@ class CashRegisterController extends Controller
             ->with('success', 'Caja cerrada exitosamente.');
     }
 
-    public function addMovement(Request $request, CashRegister $cashRegister)
+    public function addMovement(CashMovementRequest $request, CashRegister $cashRegister)
     {
         if ($cashRegister->status === 'cerrada') {
             return back()->withErrors(['error' => 'No se pueden agregar movimientos a una caja cerrada.']);
         }
 
-        $validated = $request->validate([
-            'type' => 'required|in:deposito,retiro',
-            'amount' => 'required|numeric|min:0.01',
-            'reason' => 'required|string|max:500',
-        ]);
+        $validated = $request->validated();
 
         $cashRegister->cashMovements()->create([
             'user_id' => auth()->id(),

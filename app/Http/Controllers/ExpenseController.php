@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CancelRequest;
+use App\Http\Requests\ExpenseRequest;
 use App\Models\Expense;
 use App\Models\Store;
 use Illuminate\Http\Request;
@@ -43,18 +45,9 @@ class ExpenseController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(ExpenseRequest $request)
     {
-        $validated = $request->validate([
-            'store_id' => 'required|exists:stores,id',
-            'category' => 'required|string|max:100',
-            'description' => 'required|string',
-            'amount' => 'required|numeric|min:0',
-            'expense_date' => 'required|date',
-            'items' => 'nullable|array',
-            'items.*.description' => 'required|string|max:200',
-            'items.*.amount' => 'required|numeric|min:0',
-        ]);
+        $validated = $request->validated();
 
         return DB::transaction(function () use ($validated) {
             $expense = Expense::create([
@@ -105,22 +98,13 @@ class ExpenseController extends Controller
         ]);
     }
 
-    public function update(Request $request, Expense $expense)
+    public function update(ExpenseRequest $request, Expense $expense)
     {
         if ($expense->status === 'anulado') {
             return back()->withErrors(['error' => 'No se puede actualizar un gasto anulado.']);
         }
 
-        $validated = $request->validate([
-            'store_id' => 'required|exists:stores,id',
-            'category' => 'required|string|max:100',
-            'description' => 'required|string',
-            'amount' => 'required|numeric|min:0',
-            'expense_date' => 'required|date',
-            'items' => 'nullable|array',
-            'items.*.description' => 'required|string|max:200',
-            'items.*.amount' => 'required|numeric|min:0',
-        ]);
+        $validated = $request->validated();
 
         return DB::transaction(function () use ($validated, $expense) {
             $expense->update([
@@ -148,15 +132,13 @@ class ExpenseController extends Controller
         });
     }
 
-    public function cancel(Request $request, Expense $expense)
+    public function cancel(CancelRequest $request, Expense $expense)
     {
         if ($expense->status === 'anulado') {
             return back()->withErrors(['error' => 'Este gasto ya está anulado.']);
         }
 
-        $validated = $request->validate([
-            'cancellation_reason' => 'required|string|max:500',
-        ]);
+        $validated = $request->validated();
 
         $expense->update([
             'status' => 'anulado',

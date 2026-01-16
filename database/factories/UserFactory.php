@@ -24,15 +24,40 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
+            'username' => fake()->unique()->userName(),
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'role' => 'admin',
+            'store_id' => null,
+            'is_active' => true,
             'remember_token' => Str::random(10),
             'two_factor_secret' => null,
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
         ];
+    }
+
+    public function vendedor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'vendedor',
+        ]);
+    }
+
+    public function bodega(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'bodega',
+        ]);
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
+        ]);
     }
 
     /**

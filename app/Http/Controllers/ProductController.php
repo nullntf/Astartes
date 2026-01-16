@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Store;
@@ -40,18 +41,9 @@ class ProductController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(ProductRequest $request)
     {
-        $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'sku' => 'required|string|max:50|unique:products,sku',
-            'name' => 'required|string|max:200',
-            'description' => 'nullable|string',
-            'cost_price' => 'required|numeric|min:0',
-            'sale_price' => 'required|numeric|min:0',
-            'is_active' => 'boolean',
-        ]);
-
+        $validated = $request->validated();
         $validated['created_by'] = auth()->id();
 
         $product = Product::create($validated);
@@ -79,18 +71,9 @@ class ProductController extends Controller
         ]);
     }
 
-    public function update(Request $request, Product $product)
+    public function update(ProductRequest $request, Product $product)
     {
-        $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'sku' => 'required|string|max:50|unique:products,sku,'.$product->id,
-            'name' => 'required|string|max:200',
-            'description' => 'nullable|string',
-            'cost_price' => 'required|numeric|min:0',
-            'sale_price' => 'required|numeric|min:0',
-            'is_active' => 'boolean',
-        ]);
-
+        $validated = $request->validated();
         $validated['updated_by'] = auth()->id();
 
         $product->update($validated);
