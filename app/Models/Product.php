@@ -55,4 +55,38 @@ class Product extends Model
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
+    public function stockTransfers(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class);
+    }
+
+    public function getTotalStock(): int
+    {
+        return (int) $this->stores()->sum('store_product.stock');
+    }
+
+    public function canBeDeleted(): bool
+    {
+        return empty($this->getDeletionBlockers());
+    }
+
+    public function getDeletionBlockers(): array
+    {
+        $blockers = [];
+
+        if ($this->saleItems()->exists()) {
+            $blockers[] = 'Tiene ventas registradas';
+        }
+
+        if ($this->stores()->exists()) {
+            $blockers[] = 'Está asignado a tiendas';
+        }
+
+        if ($this->stockTransfers()->exists()) {
+            $blockers[] = 'Tiene transferencias de stock';
+        }
+
+        return $blockers;
+    }
 }

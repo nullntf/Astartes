@@ -70,4 +70,37 @@ class User extends Authenticatable
     {
         return $this->hasMany(CashMovement::class);
     }
+
+    public function stockTransfers(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class, 'created_by');
+    }
+
+    public function canBeDeleted(): bool
+    {
+        return empty($this->getDeletionBlockers());
+    }
+
+    public function getDeletionBlockers(): array
+    {
+        $blockers = [];
+
+        if ($this->sales()->exists()) {
+            $blockers[] = 'Tiene ventas registradas';
+        }
+
+        if ($this->expenses()->exists()) {
+            $blockers[] = 'Tiene gastos registrados';
+        }
+
+        if ($this->openedCashRegisters()->exists()) {
+            $blockers[] = 'Ha abierto cajas registradoras';
+        }
+
+        if ($this->stockTransfers()->exists()) {
+            $blockers[] = 'Ha realizado transferencias de stock';
+        }
+
+        return $blockers;
+    }
 }

@@ -36,4 +36,20 @@ class Category extends Model
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
+    public function canBeDeleted(): bool
+    {
+        return empty($this->getDeletionBlockers());
+    }
+
+    public function getDeletionBlockers(): array
+    {
+        $blockers = [];
+
+        if ($this->products()->exists()) {
+            $blockers[] = 'Tiene productos asociados';
+        }
+
+        return $blockers;
+    }
 }

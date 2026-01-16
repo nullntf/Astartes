@@ -93,3 +93,25 @@ test('authenticated user can view store details', function () {
         ->get(route('stores.show', $store))
         ->assertOk();
 });
+
+test('cannot delete store with assigned products', function () {
+    $store = Store::factory()->create();
+    $product = \App\Models\Product::factory()->create();
+    
+    // Asignar producto a la tienda
+    $store->products()->attach($product->id, [
+        'stock' => 10,
+        'min_stock' => 5,
+        'created_by' => $this->user->id,
+    ]);
+
+    // Verificar que el producto está asignado
+    expect($store->fresh()->products()->count())->toBe(1);
+    expect($store->fresh()->canBeDeleted())->toBeFalse();
+
+    $this->actingAs($this->user)
+        ->delete(route('stores.destroy', $store));
+
+    // La tienda debe seguir existiendo
+    $this->assertDatabaseHas('stores', ['id' => $store->id]);
+});

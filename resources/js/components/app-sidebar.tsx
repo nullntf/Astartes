@@ -1,5 +1,7 @@
 import { Link } from '@inertiajs/react';
 import {
+    AlertTriangle,
+    ArrowRightLeft,
     DollarSign,
     LayoutGrid,
     Package,
@@ -52,6 +54,16 @@ const mainNavItems: NavItem[] = [
         title: 'Productos',
         href: '/products',
         icon: Package,
+    },
+    {
+        title: 'Sin Stock',
+        href: '/products/out-of-stock',
+        icon: AlertTriangle,
+    },
+    {
+        title: 'Transferencias',
+        href: '/stock-transfers',
+        icon: ArrowRightLeft,
     },
     {
         title: 'Ventas',

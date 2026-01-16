@@ -34,7 +34,7 @@ class Store extends Model
 
     public function users(): HasMany
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, 'store_id');
     }
 
     public function sales(): HasMany
@@ -60,5 +60,51 @@ class Store extends Model
     public function updatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function stockTransfersFrom(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class, 'from_store_id');
+    }
+
+    public function stockTransfersTo(): HasMany
+    {
+        return $this->hasMany(StockTransfer::class, 'to_store_id');
+    }
+
+    public function canBeDeleted(): bool
+    {
+        return empty($this->getDeletionBlockers());
+    }
+
+    public function getDeletionBlockers(): array
+    {
+        $blockers = [];
+
+        if ($this->products()->exists()) {
+            $blockers[] = 'Tiene productos asignados';
+        }
+
+        if ($this->sales()->exists()) {
+            $blockers[] = 'Tiene ventas registradas';
+        }
+
+        if ($this->cashRegisters()->exists()) {
+            $blockers[] = 'Tiene cajas registradas';
+        }
+
+        if ($this->expenses()->exists()) {
+            $blockers[] = 'Tiene gastos registrados';
+        }
+
+        if ($this->users()->exists()) {
+            $blockers[] = 'Tiene usuarios asignados';
+        }
+
+        if ($this->stockTransfersFrom()->exists() || $this->stockTransfersTo()->exists()) {
+            $blockers[] = 'Tiene transferencias de stock';
+        }
+
+        return $blockers;
     }
 }

@@ -16,6 +16,12 @@ class CategoryController extends Controller
             ->latest()
             ->paginate(15);
 
+        $categories->getCollection()->transform(function ($category) {
+            $category->can_be_deleted = $category->canBeDeleted();
+            $category->deletion_blockers = $category->getDeletionBlockers();
+            return $category;
+        });
+
         return Inertia::render('categories/index', [
             'categories' => $categories,
         ]);
@@ -68,9 +74,25 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
+        if (!$category->canBeDeleted()) {
+            return back()->withErrors([
+                'error' => 'No se puede eliminar esta categoría: ' . implode(', ', $category->getDeletionBlockers())
+            ]);
+        }
+
         $category->delete();
 
         return redirect()->route('categories.index')
             ->with('success', 'Categoría eliminada exitosamente.');
+    }
+
+    public function toggleActive(Category $category)
+    {
+        $category->update([
+            'is_active' => !$category->is_active,
+            'updated_by' => auth()->id(),
+        ]);
+
+        return back()->with('success', 'Estado de la categoría actualizado.');
     }
 }

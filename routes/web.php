@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\StockTransferController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -24,10 +25,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('users.toggle-active');
 
     Route::resource('stores', StoreController::class);
+    Route::patch('stores/{store}/toggle-active', [StoreController::class, 'toggleActive'])
+        ->name('stores.toggle-active');
 
     Route::resource('categories', CategoryController::class);
+    Route::patch('categories/{category}/toggle-active', [CategoryController::class, 'toggleActive'])
+        ->name('categories.toggle-active');
 
+    Route::get('products/stock', [ProductController::class, 'stockManagement'])
+        ->name('products.stock');
+    Route::get('products/out-of-stock', [ProductController::class, 'outOfStock'])
+        ->name('products.out-of-stock');
     Route::resource('products', ProductController::class);
+    Route::patch('products/{product}/toggle-active', [ProductController::class, 'toggleActive'])
+        ->name('products.toggle-active');
     Route::post('products/{product}/assign-store', [ProductController::class, 'assignToStore'])
         ->name('products.assign-store');
 
@@ -46,6 +57,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('expenses', ExpenseController::class);
     Route::post('expenses/{expense}/cancel', [ExpenseController::class, 'cancel'])
         ->name('expenses.cancel');
+
+    Route::resource('stock-transfers', StockTransferController::class)
+        ->only(['index', 'create', 'store']);
+    Route::get('stock-transfers/product-stock', [StockTransferController::class, 'getProductStock'])
+        ->name('stock-transfers.product-stock');
 });
 
 require __DIR__.'/settings.php';

@@ -31,6 +31,12 @@ class UserController extends Controller
             ->latest()
             ->paginate(15);
 
+        $users->getCollection()->transform(function ($user) {
+            $user->can_be_deleted = $user->canBeDeleted();
+            $user->deletion_blockers = $user->getDeletionBlockers();
+            return $user;
+        });
+
         return Inertia::render('users/index', [
             'users' => $users,
             'filters' => $request->only(['role', 'is_active', 'search']),
@@ -95,6 +101,13 @@ class UserController extends Controller
         // Prevenir que admin elimine a otro admin
         if (auth()->user()->role === 'admin' && $user->role === 'admin') {
             return back()->withErrors(['error' => 'No puedes eliminar a otro administrador.']);
+        }
+
+        // Verificar si tiene relaciones que bloquean la eliminación
+        if (!$user->canBeDeleted()) {
+            return back()->withErrors([
+                'error' => 'No se puede eliminar este usuario: ' . implode(', ', $user->getDeletionBlockers())
+            ]);
         }
 
         $user->delete();

@@ -69,3 +69,14 @@ test('authenticated user can delete a category', function () {
 
     $this->assertDatabaseMissing('categories', ['id' => $category->id]);
 });
+
+test('cannot delete category with products', function () {
+    $category = Category::factory()->create();
+    \App\Models\Product::factory()->create(['category_id' => $category->id]);
+
+    $this->actingAs($this->user)
+        ->delete(route('categories.destroy', $category))
+        ->assertSessionHasErrors(['error']);
+
+    $this->assertDatabaseHas('categories', ['id' => $category->id]);
+});

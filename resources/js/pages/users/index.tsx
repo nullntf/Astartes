@@ -24,6 +24,8 @@ interface User {
     store_id: number | null;
     store?: { id: number; name: string };
     is_active: boolean;
+    can_be_deleted: boolean;
+    deletion_blockers: string[];
     created_at: string;
 }
 
@@ -239,13 +241,24 @@ export default function UsersIndex({ users, filters, auth }: UsersIndexProps) {
                                                                     <Edit className="h-4 w-4" />
                                                                 </Link>
                                                             </Button>
-                                                            <Button
-                                                                size="sm"
-                                                                variant="ghost"
-                                                                onClick={() => deleteUser(user.id)}
-                                                            >
-                                                                <Trash2 className="h-4 w-4 text-destructive" />
-                                                            </Button>
+                                                            {user.can_be_deleted ? (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    onClick={() => deleteUser(user.id)}
+                                                                >
+                                                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                                                </Button>
+                                                            ) : (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="ghost"
+                                                                    disabled
+                                                                    title={user.deletion_blockers.join(', ')}
+                                                                >
+                                                                    <Trash2 className="h-4 w-4 text-muted-foreground" />
+                                                                </Button>
+                                                            )}
                                                         </>
                                                     )}
                                                     {user.id === auth.user.id && (

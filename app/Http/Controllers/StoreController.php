@@ -15,6 +15,12 @@ class StoreController extends Controller
             ->latest()
             ->paginate(15);
 
+        $stores->getCollection()->transform(function ($store) {
+            $store->can_be_deleted = $store->canBeDeleted();
+            $store->deletion_blockers = $store->getDeletionBlockers();
+            return $store;
+        });
+
         return Inertia::render('stores/index', [
             'stores' => $stores,
         ]);
@@ -65,9 +71,25 @@ class StoreController extends Controller
 
     public function destroy(Store $store)
     {
+        if (!$store->canBeDeleted()) {
+            return back()->withErrors([
+                'error' => 'No se puede eliminar esta tienda: ' . implode(', ', $store->getDeletionBlockers())
+            ]);
+        }
+
         $store->delete();
 
         return redirect()->route('stores.index')
             ->with('success', 'Tienda eliminada exitosamente.');
+    }
+
+    public function toggleActive(Store $store)
+    {
+        $store->update([
+            'is_active' => !$store->is_active,
+            'updated_by' => auth()->id(),
+        ]);
+
+        return back()->with('success', 'Estado de la tienda actualizado.');
     }
 }
