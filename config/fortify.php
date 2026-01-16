@@ -144,7 +144,7 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // Features::registration(), // Deshabilitado: solo admin puede crear usuarios
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([

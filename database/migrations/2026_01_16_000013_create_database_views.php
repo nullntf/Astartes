@@ -7,6 +7,8 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // SQLite no soporta CREATE OR REPLACE VIEW, así que eliminamos primero
+        DB::statement('DROP VIEW IF EXISTS v_store_inventory');
         DB::statement("
             CREATE VIEW v_store_inventory AS
             SELECT 
@@ -28,6 +30,7 @@ return new class extends Migration
             WHERE s.is_active = TRUE AND p.is_active = TRUE
         ");
 
+        DB::statement('DROP VIEW IF EXISTS v_daily_sales_summary');
         DB::statement("
             CREATE VIEW v_daily_sales_summary AS
             SELECT 
@@ -42,6 +45,7 @@ return new class extends Migration
             GROUP BY s.store_id, st.name, DATE(s.created_at)
         ");
 
+        DB::statement('DROP VIEW IF EXISTS v_cash_register_status');
         DB::statement("
             CREATE VIEW v_cash_register_status AS
             SELECT 

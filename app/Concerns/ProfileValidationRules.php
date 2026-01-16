@@ -12,11 +12,12 @@ trait ProfileValidationRules
      *
      * @return array<string, array<int, \Illuminate\Contracts\Validation\Rule|array<mixed>|string>>
      */
-    protected function profileRules(?int $userId = null): array
+    public function profileRules(?int $userId = null): array
     {
         return [
-            'name' => $this->nameRules(),
-            'email' => $this->emailRules($userId),
+            'username' => ['required', 'string', 'max:50', 'alpha_dash', Rule::unique(User::class)->ignore($userId)],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($userId)],
         ];
     }
 
