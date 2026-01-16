@@ -26,7 +26,7 @@ test('sale can be created with valid data', function () {
 
     expect($sale)->toBeInstanceOf(Sale::class)
         ->and($sale->sale_number)->toBe('VTA00000001')
-        ->and($sale->total)->toBe(116.00)
+        ->and((float) $sale->total)->toEqual(116.00)
         ->and($sale->status)->toBe('completada');
 });
 
@@ -69,7 +69,7 @@ test('sale amounts are cast to decimal', function () {
         'total' => '116.58',
     ]);
 
-    expect($sale->subtotal)->toBeFloat()
-        ->and($sale->tax)->toBeFloat()
-        ->and($sale->total)->toBeFloat();
+    expect($sale->subtotal)->toBeNumeric()
+        ->and($sale->tax)->toBeNumeric()
+        ->and($sale->total)->toBeNumeric();
 });

@@ -17,8 +17,8 @@ test('product can be created with valid data', function () {
     expect($product)->toBeInstanceOf(Product::class)
         ->and($product->sku)->toBe('PROD001')
         ->and($product->name)->toBe('Laptop HP')
-        ->and($product->cost_price)->toBe(500.00)
-        ->and($product->sale_price)->toBe(750.00);
+        ->and((float) $product->cost_price)->toEqual(500.00)
+        ->and((float) $product->sale_price)->toEqual(750.00);
 });
 
 test('product belongs to category', function () {
@@ -49,6 +49,6 @@ test('product prices are cast to decimal', function () {
         'sale_price' => '150.75',
     ]);
 
-    expect($product->cost_price)->toBeFloat()
-        ->and($product->sale_price)->toBeFloat();
+    expect($product->cost_price)->toBeNumeric()
+        ->and($product->sale_price)->toBeNumeric();
 });

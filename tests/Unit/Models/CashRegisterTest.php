@@ -18,7 +18,7 @@ test('cash register can be opened', function () {
     ]);
 
     expect($cashRegister)->toBeInstanceOf(CashRegister::class)
-        ->and($cashRegister->opening_balance)->toBe(500.00)
+        ->and((float) $cashRegister->opening_balance)->toEqual(500.00)
         ->and($cashRegister->status)->toBe('abierta');
 });
 
@@ -48,18 +48,31 @@ test('cash register has cash movements relationship', function () {
 
 test('cash register can be closed', function () {
     $user = User::factory()->create();
-    $cashRegister = CashRegister::factory()->create(['status' => 'abierta']);
+    $cashRegister = CashRegister::factory()->create([
+        'status' => 'abierta',
+        'opening_balance' => 500.00,
+    ]);
+
+    // Crear una venta en efectivo para que el Observer calcule el expected_balance
+    Sale::factory()->create([
+        'cash_register_id' => $cashRegister->id,
+        'store_id' => $cashRegister->store_id,
+        'total' => 200.00,
+        'payment_method' => 'efectivo',
+        'status' => 'completada',
+    ]);
 
     $cashRegister->update([
         'status' => 'cerrada',
         'closed_by' => $user->id,
         'closed_at' => now(),
-        'closing_balance' => 1500.00,
-        'expected_balance' => 1450.00,
-        'difference' => 50.00,
+        'closing_balance' => 750.00, // closing_balance
     ]);
 
+    // El Observer calcula: expected_balance = opening_balance + ventas = 500 + 200 = 700
+    // difference = closing_balance - expected_balance = 750 - 700 = 50
     expect($cashRegister->status)->toBe('cerrada')
         ->and($cashRegister->closedBy)->toBeInstanceOf(User::class)
-        ->and($cashRegister->difference)->toBe(50.00);
+        ->and((float) $cashRegister->expected_balance)->toEqual(700.00)
+        ->and((float) $cashRegister->difference)->toEqual(50.00);
 });
