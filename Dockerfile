@@ -42,6 +42,10 @@ COPY . .
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
+# Force npm rebuild - bust cache
+ARG CACHEBUST=1
+RUN echo "Cache bust: $CACHEBUST"
+
 # Install Node dependencies and build assets
 RUN npm ci && npm run build
 
