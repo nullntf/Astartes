@@ -34,8 +34,7 @@ test('authenticated user can open a cash register', function () {
             'notes' => 'Apertura normal',
         ]);
 
-    $cashRegister = CashRegister::latest()->first();
-    $response->assertRedirect(route('cash-registers.show', $cashRegister));
+    $response->assertRedirect(route('sales.create'));
 
     $this->assertDatabaseHas('cash_registers', [
         'store_id' => $this->store->id,

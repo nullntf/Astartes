@@ -14,6 +14,7 @@ class CashRegisterStatusView extends Model
 
     protected $casts = [
         'id' => 'integer',
+        'store_id' => 'integer',
         'opened_at' => 'datetime',
         'opening_balance' => 'decimal:2',
         'closed_at' => 'datetime',

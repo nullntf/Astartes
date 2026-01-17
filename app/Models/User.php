@@ -76,6 +76,53 @@ class User extends Authenticatable
         return $this->hasMany(StockTransfer::class, 'created_by');
     }
 
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isBodega(): bool
+    {
+        return $this->role === 'bodega';
+    }
+
+    public function isVendedor(): bool
+    {
+        return $this->role === 'vendedor';
+    }
+
+    public function canAccessStore(int $storeId): bool
+    {
+        if ($this->isAdmin() || $this->isBodega()) {
+            return true;
+        }
+
+        return $this->store_id === $storeId;
+    }
+
+    public function getAccessibleStoreId(): ?int
+    {
+        if ($this->isVendedor()) {
+            return $this->store_id;
+        }
+
+        return null;
+    }
+
+    public function hasOpenCashRegister(): bool
+    {
+        return $this->openedCashRegisters()
+            ->where('status', 'abierta')
+            ->exists();
+    }
+
+    public function getOpenCashRegister(): ?CashRegister
+    {
+        return $this->openedCashRegisters()
+            ->where('status', 'abierta')
+            ->first();
+    }
+
     public function canBeDeleted(): bool
     {
         return empty($this->getDeletionBlockers());

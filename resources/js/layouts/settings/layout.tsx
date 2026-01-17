@@ -1,5 +1,5 @@
-import { Link } from '@inertiajs/react';
-import { type PropsWithChildren } from 'react';
+import { Link, usePage } from '@inertiajs/react';
+import { type PropsWithChildren, useMemo } from 'react';
 
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
@@ -10,33 +10,29 @@ import { edit as editAppearance } from '@/routes/appearance';
 import { edit } from '@/routes/profile';
 import { show } from '@/routes/two-factor';
 import { edit as editPassword } from '@/routes/user-password';
-import { type NavItem } from '@/types';
-
-const sidebarNavItems: NavItem[] = [
-    {
-        title: 'Profile',
-        href: edit(),
-        icon: null,
-    },
-    {
-        title: 'Password',
-        href: editPassword(),
-        icon: null,
-    },
-    {
-        title: 'Two-Factor Auth',
-        href: show(),
-        icon: null,
-    },
-    {
-        title: 'Appearance',
-        href: editAppearance(),
-        icon: null,
-    },
-];
+import { type NavItem, type SharedData } from '@/types';
 
 export default function SettingsLayout({ children }: PropsWithChildren) {
     const { urlIsActive } = useActiveUrl();
+    const { auth } = usePage<SharedData>().props;
+    const { isAdmin } = auth;
+
+    const sidebarNavItems = useMemo<NavItem[]>(() => {
+        // Admin: todas las opciones de settings
+        if (isAdmin) {
+            return [
+                { title: 'Profile', href: edit(), icon: null },
+                { title: 'Password', href: editPassword(), icon: null },
+                { title: 'Two-Factor Auth', href: show(), icon: null },
+                { title: 'Appearance', href: editAppearance(), icon: null },
+            ];
+        }
+
+        // Vendedor y Bodega: solo appearance
+        return [
+            { title: 'Appearance', href: editAppearance(), icon: null },
+        ];
+    }, [isAdmin]);
 
     // When server-side rendering, we only render the layout on the client...
     if (typeof window === 'undefined') {

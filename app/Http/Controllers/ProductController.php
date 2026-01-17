@@ -160,7 +160,6 @@ class ProductController extends Controller
             ->join('stores', 'store_product.store_id', '=', 'stores.id')
             ->join('categories', 'products.category_id', '=', 'categories.id')
             ->where('store_product.stock', '=', 0)
-            ->where('products.is_active', true)
             ->where('stores.is_active', true)
             ->select(
                 'products.id as product_id',

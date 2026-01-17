@@ -50,6 +50,7 @@ return new class extends Migration
             CREATE VIEW v_cash_register_status AS
             SELECT 
                 cr.id,
+                cr.store_id,
                 s.name AS store_name,
                 u1.name AS opened_by,
                 cr.opened_at,

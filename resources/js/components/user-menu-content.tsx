@@ -1,4 +1,4 @@
-import { Link, router } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { LogOut, Settings } from 'lucide-react';
 
 import {
@@ -10,8 +10,9 @@ import {
 import { UserInfo } from '@/components/user-info';
 import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { logout } from '@/routes';
+import { edit as editAppearance } from '@/routes/appearance';
 import { edit } from '@/routes/profile';
-import { type User } from '@/types';
+import { type SharedData, type User } from '@/types';
 
 interface UserMenuContentProps {
     user: User;
@@ -19,11 +20,16 @@ interface UserMenuContentProps {
 
 export function UserMenuContent({ user }: UserMenuContentProps) {
     const cleanup = useMobileNavigation();
+    const { auth } = usePage<SharedData>().props;
+    const { isAdmin } = auth;
 
     const handleLogout = () => {
         cleanup();
         router.flushAll();
     };
+
+    // Admin va a profile, otros roles van a appearance
+    const settingsHref = isAdmin ? edit() : editAppearance();
 
     return (
         <>
@@ -37,7 +43,7 @@ export function UserMenuContent({ user }: UserMenuContentProps) {
                 <DropdownMenuItem asChild>
                     <Link
                         className="block w-full cursor-pointer"
-                        href={edit()}
+                        href={settingsHref}
                         prefetch
                         onClick={cleanup}
                     >

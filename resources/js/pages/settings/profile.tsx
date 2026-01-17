@@ -43,7 +43,7 @@ export default function Profile({
                     />
 
                     <Form
-                        action="/profile"
+                        action="/settings/profile"
                         method="patch"
                         options={{
                             preserveScroll: true,

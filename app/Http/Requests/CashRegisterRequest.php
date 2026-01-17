@@ -13,11 +13,29 @@ class CashRegisterRequest extends FormRequest
 
     public function rules(): array
     {
+        $user = $this->user();
+        $isAdmin = $user && $user->isAdmin();
+
         return [
             'store_id' => ['required', 'exists:stores,id'],
-            'opening_balance' => ['required', 'numeric', 'min:0'],
+            'opening_balance' => [
+                $isAdmin ? 'nullable' : 'required',
+                'numeric',
+                'min:0',
+            ],
             'notes' => ['nullable', 'string'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        // Para admin: si opening_balance está vacío, null o no existe, usar 0
+        if ($this->user()?->isAdmin()) {
+            $balance = $this->input('opening_balance');
+            if ($balance === null || $balance === '' || !$this->has('opening_balance')) {
+                $this->merge(['opening_balance' => 0]);
+            }
+        }
     }
 
     public function messages(): array
