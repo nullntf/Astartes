@@ -1,5 +1,6 @@
 FROM php:8.4-fpm-alpine
 
+# Force rebuild: 2026-01-17-v2
 # Install system dependencies
 RUN apk add --no-cache \
     git \
